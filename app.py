@@ -1,88 +1,115 @@
-from flask import Flask, render_template, request, redirect, url_for
+from datetime import date, datetime, timedelta
+
+from flask import Flask, redirect, render_template, request, url_for
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import String, or_
+from sqlalchemy.orm import Mapped, mapped_column
+
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///instruments.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+
+
+class Instrument(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    device_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    test_types: Mapped[str] = mapped_column(String(255), default="")
+    serial_number: Mapped[str] = mapped_column(String(255), default="")
+    last_verification: Mapped[date | None]
+    next_verification: Mapped[date | None]
+    certificate_number: Mapped[str] = mapped_column(String(255), default="")
+    passport_info: Mapped[str] = mapped_column(String(255), default="")
+    note: Mapped[str] = mapped_column(String(1000), default="")
+    in_verification: Mapped[bool] = mapped_column(default=False)
+
+
+def parse_date(raw_date: str | None) -> date | None:
+    if not raw_date:
+        return None
+    return datetime.strptime(raw_date, "%Y-%m-%d").date()
+
+
+@app.route("/")
+def index():
+    search = request.args.get("search", "").strip()
+
+    query = Instrument.query
+    if search:
+        like_pattern = f"%{search}%"
+        query = query.filter(
+            or_(
+                Instrument.device_name.ilike(like_pattern),
+                Instrument.test_types.ilike(like_pattern),
+                Instrument.serial_number.ilike(like_pattern),
+                Instrument.certificate_number.ilike(like_pattern),
+                Instrument.passport_info.ilike(like_pattern),
+                Instrument.note.ilike(like_pattern),
+            )
+        )
+
+    instruments = query.order_by(
+        Instrument.next_verification.asc().nullslast(),
+        Instrument.device_name.asc(),
+    ).all()
 
     return render_template(
-        'index.html',
+        "index.html",
         instruments=instruments,
-        search=search
+        search=search,
+        today=date.today(),
+        month_ahead=date.today() + timedelta(days=30),
     )
 
 
-@app.route('/add', methods=['POST'])
+@app.route("/add", methods=["POST"])
 def add_instrument():
-    last_verification = request.form.get('last_verification')
-    next_verification = request.form.get('next_verification')
-
     instrument = Instrument(
-        device_name=request.form.get('device_name'),
-        test_types=request.form.get('test_types'),
-        serial_number=request.form.get('serial_number'),
-
-        last_verification=datetime.strptime(last_verification, '%Y-%m-%d').date() if last_verification else None,
-
-        next_verification=datetime.strptime(next_verification, '%Y-%m-%d').date() if next_verification else None,
-
-        certificate_number=request.form.get('certificate_number'),
-        passport_info=request.form.get('passport_info'),
-        note=request.form.get('note'),
-
-        in_verification=True if request.form.get('in_verification') == 'on' else False
+        device_name=request.form.get("device_name", "").strip(),
+        test_types=request.form.get("test_types", "").strip(),
+        serial_number=request.form.get("serial_number", "").strip(),
+        last_verification=parse_date(request.form.get("last_verification")),
+        next_verification=parse_date(request.form.get("next_verification")),
+        certificate_number=request.form.get("certificate_number", "").strip(),
+        passport_info=request.form.get("passport_info", "").strip(),
+        note=request.form.get("note", "").strip(),
+        in_verification=request.form.get("in_verification") == "on",
     )
-
     db.session.add(instrument)
     db.session.commit()
+    return redirect(url_for("index"))
 
-    return redirect(url_for('index'))
 
+@app.route("/edit/<int:instrument_id>", methods=["GET", "POST"])
+def edit_instrument(instrument_id: int):
+    instrument = Instrument.query.get_or_404(instrument_id)
 
-@app.route('/edit/<int:id>', methods=['GET', 'POST'])
-def edit_instrument(id):
-    instrument = Instrument.query.get_or_404(id)
-
-    if request.method == 'POST':
-        instrument.device_name = request.form.get('device_name')
-        instrument.test_types = request.form.get('test_types')
-        instrument.serial_number = request.form.get('serial_number')
-
-        last_verification = request.form.get('last_verification')
-        next_verification = request.form.get('next_verification')
-
-        instrument.last_verification = (
-            datetime.strptime(last_verification, '%Y-%m-%d').date()
-            if last_verification else None
-        )
-
-        instrument.next_verification = (
-            datetime.strptime(next_verification, '%Y-%m-%d').date()
-            if next_verification else None
-        )
-
-        instrument.certificate_number = request.form.get('certificate_number')
-        instrument.passport_info = request.form.get('passport_info')
-        instrument.note = request.form.get('note')
-
-        instrument.in_verification = (
-            True if request.form.get('in_verification') == 'on' else False
-        )
-
+    if request.method == "POST":
+        instrument.device_name = request.form.get("device_name", "").strip()
+        instrument.test_types = request.form.get("test_types", "").strip()
+        instrument.serial_number = request.form.get("serial_number", "").strip()
+        instrument.last_verification = parse_date(request.form.get("last_verification"))
+        instrument.next_verification = parse_date(request.form.get("next_verification"))
+        instrument.certificate_number = request.form.get("certificate_number", "").strip()
+        instrument.passport_info = request.form.get("passport_info", "").strip()
+        instrument.note = request.form.get("note", "").strip()
+        instrument.in_verification = request.form.get("in_verification") == "on"
         db.session.commit()
+        return redirect(url_for("index"))
 
-        return redirect(url_for('index'))
-
-    return render_template('edit.html', instrument=instrument)
+    return render_template("edit.html", instrument=instrument)
 
 
-@app.route('/delete/<int:id>')
-def delete_instrument(id):
-    instrument = Instrument.query.get_or_404(id)
-
+@app.route("/delete/<int:instrument_id>", methods=["POST"])
+def delete_instrument(instrument_id: int):
+    instrument = Instrument.query.get_or_404(instrument_id)
     db.session.delete(instrument)
     db.session.commit()
+    return redirect(url_for("index"))
 
-    return redirect(url_for('index'))
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-
     app.run(debug=True)
