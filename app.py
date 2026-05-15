@@ -161,6 +161,20 @@ def edit_instrument(instrument_id: int):
     return render_template("edit.html", instrument=instrument)
 
 
+@app.route('/instrument/<int:instrument_id>')
+def instrument_card(instrument_id):
+
+    instrument = Instrument.query.get_or_404(instrument_id)
+
+    today = date.today()
+
+    return render_template(
+        'instrument_card.html',
+        instrument=instrument,
+        today=today
+    )
+
+
 @app.route("/delete/<int:instrument_id>", methods=["POST"])
 def delete_instrument(instrument_id: int):
     instrument = Instrument.query.get_or_404(instrument_id)
