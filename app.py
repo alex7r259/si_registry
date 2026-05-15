@@ -25,10 +25,29 @@ class Instrument(db.Model):
     in_verification: Mapped[bool] = mapped_column(default=False)
 
 
+class ActionLog(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    action: Mapped[str] = mapped_column(String(50))
+    device_name: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str] = mapped_column(String(1000))
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+
 def parse_date(raw_date: str | None) -> date | None:
     if not raw_date:
         return None
     return datetime.strptime(raw_date, "%Y-%m-%d").date()
+
+
+def add_log(action: str, device_name: str, description: str):
+    log = ActionLog(
+        action=action,
+        device_name=device_name,
+        description=description,
+    )
+
+    db.session.add(log)
+    db.session.commit()
 
 
 @app.route("/")
@@ -78,6 +97,11 @@ def add_instrument():
     )
     db.session.add(instrument)
     db.session.commit()
+    add_log(
+        "ADD",
+        instrument.device_name,
+        f"Добавлено средство измерений № {instrument.serial_number}"
+    )
     return redirect(url_for("index"))
 
 
@@ -86,6 +110,14 @@ def edit_instrument(instrument_id: int):
     instrument = Instrument.query.get_or_404(instrument_id)
 
     if request.method == "POST":
+        changes = []
+
+        if instrument.device_name != request.form.get("device_name", "").strip():
+            changes.append("Изменено наименование")
+
+        if instrument.serial_number != request.form.get("serial_number", "").strip():
+            changes.append("Изменен заводской номер")
+
         instrument.device_name = request.form.get("device_name", "").strip()
         instrument.test_types = request.form.get("test_types", "").strip()
         instrument.serial_number = request.form.get("serial_number", "").strip()
@@ -96,6 +128,13 @@ def edit_instrument(instrument_id: int):
         instrument.note = request.form.get("note", "").strip()
         instrument.in_verification = request.form.get("in_verification") == "on"
         db.session.commit()
+
+        if changes:
+            add_log(
+                "EDIT",
+                instrument.device_name,
+                ", ".join(changes)
+            )
         return redirect(url_for("index"))
 
     return render_template("edit.html", instrument=instrument)
@@ -104,9 +143,26 @@ def edit_instrument(instrument_id: int):
 @app.route("/delete/<int:instrument_id>", methods=["POST"])
 def delete_instrument(instrument_id: int):
     instrument = Instrument.query.get_or_404(instrument_id)
+    add_log(
+        "DELETE",
+        instrument.device_name,
+        f"Удалено СИ № {instrument.serial_number}"
+    )
     db.session.delete(instrument)
     db.session.commit()
     return redirect(url_for("index"))
+
+
+@app.route("/logs")
+def logs():
+    logs = ActionLog.query.order_by(
+        ActionLog.created_at.desc()
+    ).all()
+
+    return render_template(
+        "logs.html",
+        logs=logs
+    )
 
 
 if __name__ == "__main__":
