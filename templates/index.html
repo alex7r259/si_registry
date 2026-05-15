@@ -14,127 +14,249 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <style>
+        :root{
+
+            --bg:#eef3f8;
+
+            --panel:#ffffff;
+
+            --panel-2:#f7f9fc;
+
+            --line:#d7dee8;
+
+            --text:#0f172a;
+
+            --muted:#64748b;
+
+            --accent:#009999;
+
+            --accent2:#0078d4;
+
+            --success:#16a34a;
+
+            --warning:#d97706;
+
+            --danger:#dc2626;
+        }
+
         body{
-            background:#0f172a;
-            color:#e2e8f0;
-            font-family:Inter,system-ui,sans-serif;
+            margin:0;
+            background:linear-gradient(135deg,#eef3f8,#dde7f2);
+            color:var(--text);
+            font-family:Inter,Segoe UI,sans-serif;
+            min-height:100vh;
         }
 
-        .page-title{
-            font-size:32px;
-            font-weight:700;
-            margin-bottom:24px;
+        .sidebar{
+
+            width:280px;
+
+            background:#ffffff;
+
+            border-right:1px solid var(--line);
+
+            padding:24px;
+
+            position:fixed;
+
+            top:0;
+
+            left:0;
+
+            bottom:0;
+
+            overflow:auto;
+
+            box-shadow:0 0 30px rgba(15,23,42,.06);
         }
 
-        .glass-card{
-            background:rgba(15,23,42,.75);
-            backdrop-filter:blur(16px);
-            border:1px solid rgba(255,255,255,.08);
-            border-radius:20px;
-            box-shadow:0 10px 40px rgba(0,0,0,.35);
+        .page-title{font-size:32px;font-weight:700;margin-bottom:24px;}
+
+        .glass,.glass-card{
+
+            background:#ffffff;
+
+            border:1px solid rgba(15,23,42,.06);
+
+            border-radius:24px;
+
+            box-shadow:
+                    0 10px 40px rgba(15,23,42,.06),
+                    0 2px 6px rgba(15,23,42,.04);
         }
 
-        .card-header{
-            background:transparent !important;
-            border-bottom:1px solid rgba(255,255,255,.08);
-            font-weight:600;
-            color:#fff;
-        }
+        .card-header{background:transparent !important;border-bottom:1px solid var(--line);font-weight:600;color:#0f172a;}
 
         .form-control{
-            background:#111827;
-            border:1px solid #334155;
-            color:#fff;
-            border-radius:12px;
-            min-height:48px;
+
+            background:#f8fafc;
+
+            border:1px solid var(--line);
+
+            color:#0f172a;
+
+            border-radius:14px;
+
+            min-height:52px;
+
+            transition:.2s;
         }
 
         .form-control:focus{
-            background:#111827;
-            color:#fff;
-            border-color:#3b82f6;
-            box-shadow:0 0 0 .2rem rgba(59,130,246,.25);
+
+            background:white;
+
+            border-color:var(--accent2);
+
+            color:#0f172a;
+
+            box-shadow:0 0 0 .2rem rgba(0,120,212,.12);
+        }
+
+        .table-wrapper{
+
+            border-radius:22px;
+
+            overflow:hidden;
+
+            border:1px solid rgba(15,23,42,.06);
         }
 
         .table{
-            color:#e2e8f0;
+
+            color:#0f172a;
+
+            margin:0;
+
+            border-collapse:separate;
+
+            border-spacing:0;
         }
 
         .table thead{
-            background:#111827;
+
+            background:linear-gradient(
+                    90deg,
+                    #f8fafc,
+                    #eef3f8
+            );
         }
 
-        .table td,
-        .table th{
-            border-color:#1e293b !important;
-            vertical-align:middle;
-        }
+        .table thead th{
 
-        .table-hover tbody tr:hover{
-            background:rgba(255,255,255,.04);
-        }
-
-        .btn-primary{
-            background:#2563eb;
             border:none;
-            border-radius:12px;
-            min-height:48px;
-            font-weight:600;
-        }
 
-        .btn-primary:hover{
-            background:#1d4ed8;
-        }
+            padding:20px 18px;
 
-        .btn-danger{
-            border-radius:10px;
-        }
+            color:#334155;
 
-        .btn-secondary{
-            border-radius:10px;
-        }
-
-        .badge-status{
-            padding:8px 12px;
-            border-radius:999px;
             font-size:12px;
+
+            text-transform:uppercase;
+
+            letter-spacing:1px;
+
+            font-weight:700;
+        }
+
+        .table tbody td{
+
+            border-top:1px solid #eef2f7;
+
+            padding:18px;
+
+            vertical-align:middle;
+
+            font-size:14px;
+        }
+
+        .table tbody tr{
+
+            transition:.18s;
+
+            background:white;
+        }
+
+        .table tbody tr:hover{
+
+            background:#f8fbff;
+
+            transform:scale(1.002);
+        }
+
+        .status,.badge-status{padding:8px 14px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.2px;}
+        .status-ok{background:#dcfce7;color:#166534;}
+        .status-warning{background:#fef3c7;color:#92400e;}
+        .status-danger{background:#fee2e2;color:#991b1b;}
+
+        .btn-industrial{
+
+            background:linear-gradient(
+                    135deg,
+                    #009999,
+                    #0078d4
+            );
+
+            border:none;
+
+            border-radius:14px;
+
+            min-height:50px;
+
+            color:white;
+
             font-weight:600;
+
+            padding:0 22px;
+
+            transition:.18s;
+
+            box-shadow:0 6px 18px rgba(0,120,212,.15);
         }
 
-        .status-ok{
-            background:rgba(34,197,94,.2);
-            color:#4ade80;
+        .btn-industrial:hover{
+
+            transform:translateY(-2px);
+
+            box-shadow:0 12px 28px rgba(0,120,212,.22);
         }
 
-        .status-warning{
-            background:rgba(250,204,21,.2);
-            color:#facc15;
-        }
+        .dataTables_wrapper{color:#334155;}
 
-        .status-danger{
-            background:rgba(239,68,68,.2);
-            color:#f87171;
-        }
+        .dataTables_filter input,
+        .dataTables_length select{
 
-        .dataTables_wrapper{
-            color:#fff;
-        }
+            background:white !important;
 
-        .dataTables_filter input{
-            background:#111827 !important;
-            color:#fff !important;
-            border:1px solid #334155 !important;
+            border:1px solid var(--line) !important;
+
+            color:#0f172a !important;
+
+            border-radius:12px !important;
+
+            min-height:42px;
         }
 
         .pagination .page-link{
-            background:#111827;
-            border-color:#334155;
-            color:#fff;
+
+            background:white;
+
+            border-color:#dbe3ec;
+
+            color:#334155;
+
+            border-radius:10px;
+
+            margin:0 3px;
         }
 
         .pagination .active .page-link{
-            background:#2563eb;
-            border-color:#2563eb;
+
+            background:#0078d4;
+
+            border-color:#0078d4;
+
+            color:white;
         }
     </style>
 </head>
@@ -164,14 +286,14 @@
             <i class="fa-solid fa-clock-rotate-left me-2"></i>
             Журнал действий
         </a>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInstrumentModal">
+        <button class="btn btn-industrial" data-bs-toggle="modal" data-bs-target="#addInstrumentModal">
             <i class="fa-solid fa-plus me-2"></i>Добавить СИ
         </button>
     </div>
 
     <div class="card glass-card border-0">
         <div class="card-header">Перечень СИ</div>
-        <div class="card-body table-responsive">
+        <div class="card-body table-responsive table-wrapper">
             <table id="instrumentsTable" class="table table-hover align-middle">
                 <thead>
                 <tr>
@@ -190,7 +312,42 @@
                 <tbody>
                 {% for instrument in instruments %}
                     <tr>
-                        <td>{{ instrument.device_name|e }}</td>
+                        <td>
+
+    <div class="d-flex align-items-center gap-3">
+
+        <div style="
+            width:44px;
+            height:44px;
+            border-radius:14px;
+            background:linear-gradient(135deg,#009999,#0078d4);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-size:18px;
+        ">
+            <i class="fa-solid fa-microchip"></i>
+        </div>
+
+        <div>
+
+            <div style="font-weight:700;">
+                {{ instrument.device_name }}
+            </div>
+
+            <div style="
+                font-size:12px;
+                color:#64748b;
+            ">
+                {{ instrument.serial_number }}
+            </div>
+
+        </div>
+
+    </div>
+
+</td>
                         <td>{{ instrument.test_types|e }}</td>
                         <td>{{ instrument.serial_number|e }}</td>
                         <td>{{ instrument.last_verification or '' }}</td>
