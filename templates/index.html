@@ -159,25 +159,10 @@
         </div>
     </div>
 
-    <div class="card glass-card border-0 mb-4">
-        <div class="card-header">Добавить СИ</div>
-        <div class="card-body">
-            <form method="post" action="{{ url_for('add_instrument') }}" class="row g-3">
-                <div class="col-md-4"><input required name="device_name" class="form-control" placeholder="Наименование"></div>
-                <div class="col-md-4"><input name="test_types" class="form-control" placeholder="Виды испытаний"></div>
-                <div class="col-md-4"><input name="serial_number" class="form-control" placeholder="Заводской №"></div>
-                <div class="col-md-3"><input type="date" name="last_verification" class="form-control"></div>
-                <div class="col-md-3"><input type="date" name="next_verification" class="form-control"></div>
-                <div class="col-md-3"><input name="certificate_number" class="form-control" placeholder="Свидетельство"></div>
-                <div class="col-md-3"><input name="passport_info" class="form-control" placeholder="Паспорт"></div>
-                <div class="col-md-9"><input name="note" class="form-control" placeholder="Примечание"></div>
-                <div class="col-md-3 form-check d-flex align-items-center ps-5">
-                    <input type="checkbox" class="form-check-input me-2" name="in_verification" id="in_verification">
-                    <label for="in_verification" class="form-check-label">В поверке</label>
-                </div>
-                <div class="col-12 d-grid"><button class="btn btn-primary">Добавить</button></div>
-            </form>
-        </div>
+    <div class="d-flex justify-content-end mb-4">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInstrumentModal">
+            <i class="fa-solid fa-plus me-2"></i>Добавить СИ
+        </button>
     </div>
 
     <div class="card glass-card border-0">
@@ -201,9 +186,9 @@
                 <tbody>
                 {% for instrument in instruments %}
                     <tr>
-                        <td>{{ instrument.device_name }}</td>
-                        <td>{{ instrument.test_types }}</td>
-                        <td>{{ instrument.serial_number }}</td>
+                        <td>{{ instrument.device_name|e }}</td>
+                        <td>{{ instrument.test_types|e }}</td>
+                        <td>{{ instrument.serial_number|e }}</td>
                         <td>{{ instrument.last_verification or '' }}</td>
                         <td>
                         {% if instrument.next_verification %}
@@ -222,9 +207,9 @@
                             {% endif %}
                         {% endif %}
                         </td>
-                        <td>{{ instrument.certificate_number }}</td>
-                        <td>{{ instrument.passport_info }}</td>
-                        <td>{{ instrument.note }}</td>
+                        <td>{{ instrument.certificate_number|e }}</td>
+                        <td>{{ instrument.passport_info|e }}</td>
+                        <td>{{ instrument.note|e }}</td>
                         <td>
                             {% if instrument.in_verification %}
                                 <span class="badge-status status-warning">
@@ -237,7 +222,23 @@
                             {% endif %}
                         </td>
                         <td class="text-nowrap">
-                            <a class="btn btn-sm btn-secondary" href="{{ url_for('edit_instrument', instrument_id=instrument.id) }}">Редактировать</a>
+                            <button
+                                class="btn btn-sm btn-secondary edit-btn"
+                                type="button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editInstrumentModal"
+                                data-id="{{ instrument.id }}"
+                                data-device-name="{{ instrument.device_name|e }}"
+                                data-test-types="{{ instrument.test_types|e }}"
+                                data-serial-number="{{ instrument.serial_number|e }}"
+                                data-last-verification="{{ instrument.last_verification.isoformat() if instrument.last_verification else '' }}"
+                                data-next-verification="{{ instrument.next_verification.isoformat() if instrument.next_verification else '' }}"
+                                data-certificate-number="{{ instrument.certificate_number|e }}"
+                                data-passport-info="{{ instrument.passport_info|e }}"
+                                data-note="{{ instrument.note|e }}"
+                                data-in-verification="{{ '1' if instrument.in_verification else '0' }}">
+                                Редактировать
+                            </button>
                             <form method="post" action="{{ url_for('delete_instrument', instrument_id=instrument.id) }}" class="d-inline" onsubmit="return confirm('Удалить запись?');">
                                 <button class="btn btn-sm btn-danger" type="submit">Удалить</button>
                             </form>
@@ -250,9 +251,67 @@
     </div>
 </div>
 
+
+<div class="modal fade" id="addInstrumentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content glass-card">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Добавить средство измерений</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{{ url_for('add_instrument') }}" class="row g-3">
+                    <div class="col-md-6"><input required name="device_name" class="form-control" placeholder="Наименование"></div>
+                    <div class="col-md-6"><input name="test_types" class="form-control" placeholder="Виды испытаний"></div>
+                    <div class="col-md-6"><input name="serial_number" class="form-control" placeholder="Заводской №"></div>
+                    <div class="col-md-6"><input name="certificate_number" class="form-control" placeholder="Свидетельство"></div>
+                    <div class="col-md-6"><input type="date" name="last_verification" class="form-control"></div>
+                    <div class="col-md-6"><input type="date" name="next_verification" class="form-control"></div>
+                    <div class="col-md-6"><input name="passport_info" class="form-control" placeholder="Паспорт"></div>
+                    <div class="col-md-6"><input name="note" class="form-control" placeholder="Примечание"></div>
+                    <div class="col-12 form-check d-flex align-items-center ps-5">
+                        <input type="checkbox" class="form-check-input me-2" name="in_verification" id="modal_add_in_verification">
+                        <label for="modal_add_in_verification" class="form-check-label">В поверке</label>
+                    </div>
+                    <div class="col-12 d-grid"><button class="btn btn-primary">Сохранить</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editInstrumentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content glass-card">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Редактировать средство измерений</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="editInstrumentForm" class="row g-3">
+                    <div class="col-md-6"><input required name="device_name" id="edit_device_name" class="form-control" placeholder="Наименование"></div>
+                    <div class="col-md-6"><input name="test_types" id="edit_test_types" class="form-control" placeholder="Виды испытаний"></div>
+                    <div class="col-md-6"><input name="serial_number" id="edit_serial_number" class="form-control" placeholder="Заводской №"></div>
+                    <div class="col-md-6"><input name="certificate_number" id="edit_certificate_number" class="form-control" placeholder="Свидетельство"></div>
+                    <div class="col-md-6"><input type="date" name="last_verification" id="edit_last_verification" class="form-control"></div>
+                    <div class="col-md-6"><input type="date" name="next_verification" id="edit_next_verification" class="form-control"></div>
+                    <div class="col-md-6"><input name="passport_info" id="edit_passport_info" class="form-control" placeholder="Паспорт"></div>
+                    <div class="col-md-6"><input name="note" id="edit_note" class="form-control" placeholder="Примечание"></div>
+                    <div class="col-12 form-check d-flex align-items-center ps-5">
+                        <input type="checkbox" class="form-check-input me-2" name="in_verification" id="edit_in_verification">
+                        <label for="edit_in_verification" class="form-check-label">В поверке</label>
+                    </div>
+                    <div class="col-12 d-grid"><button class="btn btn-primary">Сохранить изменения</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(function () {
         $('#instrumentsTable').DataTable({
@@ -261,6 +320,20 @@
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ru.json'
             }
+        });
+
+        $('.edit-btn').on('click', function () {
+            const button = $(this);
+            $('#editInstrumentForm').attr('action', `/edit/${button.data('id')}`);
+            $('#edit_device_name').val(button.data('deviceName'));
+            $('#edit_test_types').val(button.data('testTypes'));
+            $('#edit_serial_number').val(button.data('serialNumber'));
+            $('#edit_last_verification').val(button.data('lastVerification'));
+            $('#edit_next_verification').val(button.data('nextVerification'));
+            $('#edit_certificate_number').val(button.data('certificateNumber'));
+            $('#edit_passport_info').val(button.data('passportInfo'));
+            $('#edit_note').val(button.data('note'));
+            $('#edit_in_verification').prop('checked', button.data('inVerification') === 1);
         });
     });
 </script>
