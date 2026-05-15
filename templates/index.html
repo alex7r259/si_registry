@@ -356,25 +356,11 @@
         Реестр средств измерений
     </h1>
 
-    <div class="card glass-card border-0 mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3 align-items-end">
-                <div class="col-md-9">
-                    <label class="form-label">Поиск по любой колонке</label>
-                    <input type="text" class="form-control" name="search" value="{{ search }}" placeholder="Введите текст для поиска">
-                </div>
-                <div class="col-md-3 d-grid">
-                    <button class="btn btn-outline-primary" type="submit">Найти</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <div class="top-toolbar mb-4">
-        <a href="/logs" class="btn btn-outline-light">
+        <button class="btn btn-industrial" onclick="document.location='/logs'">
             <i class="fa-solid fa-clock-rotate-left me-2"></i>
             Журнал действий
-        </a>
+        </button>
         <button class="btn btn-industrial" data-bs-toggle="modal" data-bs-target="#addInstrumentModal">
             <i class="fa-solid fa-plus me-2"></i>Добавить СИ
         </button>
