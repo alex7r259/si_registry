@@ -287,6 +287,66 @@
 
             color:white;
         }
+
+        .expand-btn{
+            width:34px;
+            height:34px;
+            border:none;
+            border-radius:10px;
+            background:#f1f5f9;
+            color:#334155;
+            transition:.2s;
+        }
+
+        .expand-btn:hover{
+            background:#dbeafe;
+            color:#0078d4;
+        }
+
+        .expand-row{
+            display:none;
+            background:#f8fbff;
+        }
+
+        .expand-content{
+            padding:24px;
+        }
+
+        .info-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+            gap:18px;
+        }
+
+        .info-card{
+            background:white;
+            border:1px solid #e2e8f0;
+            border-radius:18px;
+            padding:18px;
+        }
+
+        .info-label{
+            font-size:12px;
+            text-transform:uppercase;
+            letter-spacing:.6px;
+            color:#64748b;
+            margin-bottom:8px;
+            font-weight:700;
+        }
+
+        .info-value{
+            font-size:14px;
+            color:#0f172a;
+            font-weight:600;
+            word-break:break-word;
+        }
+
+        .expand-actions{
+            display:flex;
+            gap:12px;
+            margin-top:20px;
+            flex-wrap:wrap;
+        }
     </style>
 </head>
 <body>
@@ -326,6 +386,7 @@
             <table id="instrumentsTable" class="table table-hover align-middle">
                 <thead>
                 <tr>
+                    <th style="width:60px"></th>
                     <th style="width:40%">Прибор</th>
                     <th style="width:20%">Испытания</th>
                     <th style="width:20%">Поверка</th>
@@ -335,7 +396,18 @@
                 </thead>
                 <tbody>
                 {% for instrument in instruments %}
-                    <tr>
+                    <tr class="main-row">
+                        <td>
+
+                            <button class="expand-btn"
+                                    onclick="toggleExpand({{ instrument.id }})">
+
+                                <i class="fa-solid fa-chevron-down"
+                                   id="expand-icon-{{ instrument.id }}"></i>
+
+                            </button>
+
+                        </td>
                         <td>
 
     <div class="d-flex align-items-center gap-3">
@@ -429,28 +501,127 @@
 {% endif %}
 
 </td>
-                        <td class="text-nowrap">
-                            <button
-                                class="btn btn-sm btn-light border edit-btn"
-                                type="button"
-                                data-bs-toggle="modal"
-                                data-bs-target="#editInstrumentModal"
-                                data-id="{{ instrument.id }}"
-                                data-device-name="{{ instrument.device_name|e }}"
-                                data-test-types="{{ instrument.test_types|e }}"
-                                data-serial-number="{{ instrument.serial_number|e }}"
-                                data-last-verification="{{ instrument.last_verification.isoformat() if instrument.last_verification else '' }}"
-                                data-next-verification="{{ instrument.next_verification.isoformat() if instrument.next_verification else '' }}"
-                                data-certificate-number="{{ instrument.certificate_number|e }}"
-                                data-passport-info="{{ instrument.passport_info|e }}"
-                                data-note="{{ instrument.note|e }}"
-                                data-in-verification="{{ '1' if instrument.in_verification else '0' }}">
-                                Редактировать
-                            </button>
-                            <form method="post" action="{{ url_for('delete_instrument', instrument_id=instrument.id) }}" class="d-inline" onsubmit="return confirm('Удалить запись?');">
-                                <button class="btn btn-sm btn-danger" type="submit">Удалить</button>
-                            </form>
+                        <td class="text-nowrap"></td>
+                    </tr>
+                    <tr class="expand-row"
+                        id="expand-row-{{ instrument.id }}">
+
+                        <td colspan="6">
+
+                            <div class="expand-content">
+
+                                <div class="info-grid">
+
+                                    <div class="info-card">
+
+                                        <div class="info-label">
+                                            Заводской номер
+                                        </div>
+
+                                        <div class="info-value">
+                                            {{ instrument.serial_number or '—' }}
+                                        </div>
+
+                                    </div>
+
+                                    <div class="info-card">
+
+                                        <div class="info-label">
+                                            Свидетельство
+                                        </div>
+
+                                        <div class="info-value">
+                                            {{ instrument.certificate_number or '—' }}
+                                        </div>
+
+                                    </div>
+
+                                    <div class="info-card">
+
+                                        <div class="info-label">
+                                            Паспорт
+                                        </div>
+
+                                        <div class="info-value">
+                                            {{ instrument.passport_info or '—' }}
+                                        </div>
+
+                                    </div>
+
+                                    <div class="info-card">
+
+                                        <div class="info-label">
+                                            Последняя поверка
+                                        </div>
+
+                                        <div class="info-value">
+
+                                            {% if instrument.last_verification %}
+                                                {{ instrument.last_verification.strftime('%d.%m.%Y') }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="info-card">
+
+                                        <div class="info-label">
+                                            Примечание
+                                        </div>
+
+                                        <div class="info-value">
+                                            {{ instrument.note or 'Нет примечаний' }}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="expand-actions">
+
+                                    <button
+                                        class="btn btn-industrial edit-btn"
+                                        type="button"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editInstrumentModal"
+                                        data-id="{{ instrument.id }}"
+                                        data-device-name="{{ instrument.device_name|e }}"
+                                        data-test-types="{{ instrument.test_types|e }}"
+                                        data-serial-number="{{ instrument.serial_number|e }}"
+                                        data-last-verification="{{ instrument.last_verification.isoformat() if instrument.last_verification else '' }}"
+                                        data-next-verification="{{ instrument.next_verification.isoformat() if instrument.next_verification else '' }}"
+                                        data-certificate-number="{{ instrument.certificate_number|e }}"
+                                        data-passport-info="{{ instrument.passport_info|e }}"
+                                        data-note="{{ instrument.note|e }}"
+                                        data-in-verification="{{ '1' if instrument.in_verification else '0' }}">
+
+                                        <i class="fa-solid fa-pen me-2"></i>
+                                        Редактировать
+
+                                    </button>
+
+                                    <form method="post"
+                                          action="{{ url_for('delete_instrument', instrument_id=instrument.id) }}"
+                                          onsubmit="return confirm('Удалить запись?');">
+
+                                        <button class="btn btn-danger">
+
+                                            <i class="fa-solid fa-trash me-2"></i>
+                                            Удалить
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
                         </td>
+
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -524,7 +695,7 @@
     $(function () {
         $('#instrumentsTable').DataTable({
             pageLength: 25,
-            order: [[2, 'asc']],
+            order: [[3, 'asc']],
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ru.json'
             }
@@ -544,6 +715,35 @@
             $('#edit_in_verification').prop('checked', button.data('inVerification') === 1);
         });
     });
+</script>
+<script>
+
+function toggleExpand(id){
+
+    const row =
+        document.getElementById(`expand-row-${id}`);
+
+    const icon =
+        document.getElementById(`expand-icon-${id}`);
+
+    if(row.style.display === 'table-row'){
+
+        row.style.display = 'none';
+
+        icon.classList.remove('fa-chevron-up');
+
+        icon.classList.add('fa-chevron-down');
+
+    }else{
+
+        row.style.display = 'table-row';
+
+        icon.classList.remove('fa-chevron-down');
+
+        icon.classList.add('fa-chevron-up');
+    }
+}
+
 </script>
 </body>
 </html>
