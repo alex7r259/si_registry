@@ -423,7 +423,17 @@
                 box-shadow:0 0 0 rgba(220,38,38,0);
             }
         }
-    </style>
+    
+        #instrumentsTable .child{
+            background:#f8fbff !important;
+        }
+
+        .info-card .qrcode{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+</style>
 </head>
 <body>
 <div class="container py-4">
@@ -557,10 +567,13 @@
                         <td>
 
                             <button class="expand-btn"
+                                    data-id="{{ instrument.id }}"
+                                    data-device="{{ instrument.device_name|e }}"
                                     data-serial="{{ instrument.serial_number|e }}"
                                     data-certificate="{{ instrument.certificate_number|e }}"
                                     data-passport="{{ instrument.passport_info|e }}"
-                                    data-note="{{ instrument.note|e }}">
+                                    data-note="{{ instrument.note|e }}"
+                                    data-next="{{ instrument.next_verification.strftime('%d.%m.%Y') if instrument.next_verification else '—' }}">
 
                                 <i class="fa-solid fa-chevron-down"></i>
 
@@ -794,6 +807,10 @@
 
             const icon = $(this).find('i');
 
+            const button = $(this);
+
+            const qrId = `qr-${button.data('id')}`;
+
             if (row.child.isShown()) {
 
                 row.child.hide();
@@ -804,8 +821,6 @@
                     .addClass('fa-chevron-down');
 
             } else {
-
-                const button = $(this);
 
                 row.child(`
 
@@ -842,6 +857,15 @@
 
                             <div class="info-card">
                                 <div class="info-label">
+                                    Следующая поверка
+                                </div>
+                                <div class="info-value">
+                                    ${button.data('next') || '—'}
+                                </div>
+                            </div>
+
+                            <div class="info-card">
+                                <div class="info-label">
                                     Примечание
                                 </div>
                                 <div class="info-value">
@@ -855,10 +879,8 @@
                                     QR-код
                                 </div>
 
-                                <div class="info-value">
-
-                                    <div id="qr-${button.data('serial')}"></div>
-
+                                <div class="info-value qrcode">
+                                    <div id="${qrId}"></div>
                                 </div>
 
                             </div>
@@ -869,18 +891,24 @@
 
                 `).show();
 
-                new QRCode(
-                    document.getElementById(`qr-${button.data('serial')}`),
-                    {
-                        text: JSON.stringify({
-                            device: tr.find('td:eq(1)').text().trim(),
-                            serial: button.data('serial'),
-                            certificate: button.data('certificate')
-                        }),
-                        width: 120,
-                        height: 120
-                    }
-                );
+                setTimeout(() => {
+
+                    new QRCode(
+                        document.getElementById(qrId),
+                        {
+                            text: JSON.stringify({
+                                device: button.data('device'),
+                                serial: button.data('serial'),
+                                next_verification: button.data('next'),
+                                certificate: button.data('certificate')
+                            }),
+
+                            width: 120,
+                            height: 120
+                        }
+                    );
+
+                }, 50);
 
                 tr.addClass('shown');
 
