@@ -573,7 +573,7 @@
                                     data-certificate="{{ instrument.certificate_number|e }}"
                                     data-passport="{{ instrument.passport_info|e }}"
                                     data-note="{{ instrument.note|e }}"
-                                    data-next="{{ instrument.next_verification.strftime('%d.%m.%Y') if instrument.next_verification else '—' }}">
+                                    data-last="{{ instrument.last_verification.strftime('%d.%m.%Y') if instrument.next_verification else '—' }}">
 
                                 <i class="fa-solid fa-chevron-down"></i>
 
@@ -857,10 +857,10 @@
 
                             <div class="info-card">
                                 <div class="info-label">
-                                    Следующая поверка
+                                    Дата поверки
                                 </div>
                                 <div class="info-value">
-                                    ${button.data('next') || '—'}
+                                    ${button.data('last') || '—'}
                                 </div>
                             </div>
 
@@ -896,13 +896,7 @@
                     new QRCode(
                         document.getElementById(qrId),
                         {
-                            text: JSON.stringify({
-                                device: button.data('device'),
-                                serial: button.data('serial'),
-                                next_verification: button.data('next'),
-                                certificate: button.data('certificate')
-                            }),
-
+                            text: `${window.location.origin}/instrument/${button.data('id')}`,
                             width: 120,
                             height: 120
                         }
