@@ -433,7 +433,7 @@
 
 </td>
                         <td>{{ instrument.test_types|e }}</td>
-                        <td>
+                        <td data-order="{{ instrument.next_verification.isoformat() if instrument.next_verification else '9999-12-31' }}">
 
 {% if instrument.next_verification %}
 
@@ -489,7 +489,46 @@
 {% endif %}
 
 </td>
-                        <td class="text-nowrap"></td>
+                        <td class="text-nowrap">
+
+    <div class="d-flex gap-2">
+
+        <button
+            class="btn btn-sm btn-secondary edit-btn"
+            type="button"
+            data-bs-toggle="modal"
+            data-bs-target="#editInstrumentModal"
+
+            data-id="{{ instrument.id }}"
+            data-device-name="{{ instrument.device_name|e }}"
+            data-test-types="{{ instrument.test_types|e }}"
+            data-serial-number="{{ instrument.serial_number|e }}"
+            data-last-verification="{{ instrument.last_verification.isoformat() if instrument.last_verification else '' }}"
+            data-next-verification="{{ instrument.next_verification.isoformat() if instrument.next_verification else '' }}"
+            data-certificate-number="{{ instrument.certificate_number|e }}"
+            data-passport-info="{{ instrument.passport_info|e }}"
+            data-note="{{ instrument.note|e }}"
+            data-in-verification="{{ '1' if instrument.in_verification else '0' }}">
+
+            <i class="fa-solid fa-pen"></i>
+
+        </button>
+
+        <form method="post"
+              action="{{ url_for('delete_instrument', instrument_id=instrument.id) }}"
+              onsubmit="return confirm('Удалить запись?');">
+
+            <button class="btn btn-sm btn-danger">
+
+                <i class="fa-solid fa-trash"></i>
+
+            </button>
+
+        </form>
+
+    </div>
+
+</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -652,7 +691,7 @@
 
         });
 
-        $('.edit-btn').on('click', function () {
+        $(document).on('click', '.edit-btn', function () {
             const button = $(this);
             $('#editInstrumentForm').attr('action', `/edit/${button.data('id')}`);
             $('#edit_device_name').val(button.data('deviceName'));
