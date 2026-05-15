@@ -27,9 +27,17 @@ class Instrument(db.Model):
 
 class ActionLog(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
+
     action: Mapped[str] = mapped_column(String(50))
+
     device_name: Mapped[str] = mapped_column(String(255))
+
     description: Mapped[str] = mapped_column(String(1000))
+
+    username: Mapped[str] = mapped_column(String(255), default='system')
+
+    ip_address: Mapped[str] = mapped_column(String(255), default='unknown')
+
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
 
@@ -40,10 +48,23 @@ def parse_date(raw_date: str | None) -> date | None:
 
 
 def add_log(action: str, device_name: str, description: str):
+
+    ip = request.headers.get(
+        'X-Forwarded-For',
+        request.remote_addr
+    )
+
+    username = request.headers.get(
+        'X-User',
+        'operator'
+    )
+
     log = ActionLog(
         action=action,
         device_name=device_name,
         description=description,
+        username=username,
+        ip_address=ip
     )
 
     db.session.add(log)

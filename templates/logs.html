@@ -42,6 +42,8 @@
                     <th>Действие</th>
                     <th>Прибор</th>
                     <th>Описание</th>
+                    <th>Пользователь</th>
+                    <th>IP</th>
                 </tr>
 
                 </thead>
@@ -87,6 +89,9 @@
                         <td>
                             {{ log.description }}
                         </td>
+
+                        <td>{{ log.username }}</td>
+                        <td>{{ log.ip_address }}</td>
 
                     </tr>
 
