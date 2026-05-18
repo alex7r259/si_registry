@@ -78,6 +78,24 @@
                                     Удаление
                                 </span>
 
+                            {% elif log.action == 'VIEW' %}
+
+                                <span class="badge bg-info text-dark">
+                                    Просмотр
+                                </span>
+
+                            {% elif log.action == 'SEARCH' %}
+
+                                <span class="badge bg-primary">
+                                    Поиск
+                                </span>
+
+                            {% elif log.action == 'FGIS_SYNC' %}
+
+                                <span class="badge bg-info">
+                                    ФГИС
+                                </span>
+
                             {% endif %}
 
                         </td>
