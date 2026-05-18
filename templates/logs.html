@@ -78,6 +78,18 @@
                                     Удаление
                                 </span>
 
+                            {% elif log.action == 'VIEW' %}
+
+                                <span class="badge bg-info text-dark">
+                                    Просмотр
+                                </span>
+
+                            {% elif log.action == 'SEARCH' %}
+
+                                <span class="badge bg-primary">
+                                    Поиск
+                                </span>
+
                             {% endif %}
 
                         </td>

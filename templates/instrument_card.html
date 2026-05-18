@@ -2,6 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
 
     <title>{{ instrument.device_name }}</title>
 
@@ -12,7 +14,7 @@
         body{
             background:#eef3f8;
             font-family:Inter,Segoe UI,sans-serif;
-            padding:40px;
+            padding:16px;
         }
 
         .card-si{
@@ -24,7 +26,7 @@
 
             border-radius:28px;
 
-            padding:40px;
+            padding:24px;
 
             box-shadow:
                 0 10px 40px rgba(15,23,42,.08);
@@ -34,6 +36,8 @@
             font-size:34px;
             font-weight:800;
             margin-bottom:30px;
+            word-break:break-word;
+            line-height:1.2;
         }
 
         .grid{
@@ -106,6 +110,43 @@
             color:#991b1b;
         }
 
+
+        @media (max-width:768px){
+
+            body{
+                padding:10px;
+            }
+
+            .card-si{
+                padding:18px;
+                border-radius:20px;
+            }
+
+            .title{
+                font-size:24px;
+                margin-bottom:20px;
+            }
+
+            .grid{
+                grid-template-columns:1fr;
+                gap:14px;
+            }
+
+            .info{
+                padding:16px;
+            }
+
+            .value{
+                font-size:15px;
+            }
+
+            .status{
+                width:100%;
+                justify-content:center;
+            }
+
+        }
+
     </style>
 </head>
 <body>
@@ -164,6 +205,30 @@
                 {{ instrument.certificate_number or '—' }}
             </div>
         </div>
+
+
+        {% if fgis_data and fgis_data.url %}
+
+        <div class="info">
+
+            <div class="label">
+                ФГИС Аршин
+            </div>
+
+            <div class="value">
+
+                <a href="{{ fgis_data.url }}"
+                   target="_blank">
+
+                    Открыть запись в ФГИС
+
+                </a>
+
+            </div>
+
+        </div>
+
+        {% endif %}
 
         <div class="info">
             <div class="label">Паспорт</div>

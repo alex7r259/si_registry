@@ -1,5 +1,8 @@
 from datetime import date, datetime, timedelta
+import re
 
+import requests
+from bs4 import BeautifulSoup
 from flask import Flask, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String, or_
@@ -71,12 +74,68 @@ def add_log(action: str, device_name: str, description: str):
     db.session.commit()
 
 
+
+def get_fgis_url(certificate_number: str) -> str | None:
+
+    if not certificate_number:
+        return None
+
+    match = re.search(r'/(\d+)$', certificate_number)
+
+    if not match:
+        return None
+
+    number = match.group(1)
+
+    return f"https://fgis.gost.ru/fundmetrology/cm/iaux/vri/1-{number}"
+
+
+def load_fgis_data(certificate_number: str):
+
+    url = get_fgis_url(certificate_number)
+
+    if not url:
+        return None
+
+    try:
+
+        response = requests.get(
+            url,
+            timeout=10,
+            headers={
+                "User-Agent": "Mozilla/5.0"
+            }
+        )
+
+        if response.status_code != 200:
+            return None
+
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        text = soup.get_text(" ", strip=True)
+
+        return {
+            "url": url,
+            "raw_text": text[:3000]
+        }
+
+    except Exception:
+        return None
+
+
 @app.route("/")
 def index():
     search = request.args.get("search", "").strip()
 
     query = Instrument.query
     if search:
+
+        add_log(
+            "SEARCH",
+            "SYSTEM",
+            f"Поиск: {search}"
+        )
+
         like_pattern = f"%{search}%"
         query = query.filter(
             or_(
@@ -133,11 +192,49 @@ def edit_instrument(instrument_id: int):
     if request.method == "POST":
         changes = []
 
-        if instrument.device_name != request.form.get("device_name", "").strip():
-            changes.append("Изменено наименование")
+        fields = {
 
-        if instrument.serial_number != request.form.get("serial_number", "").strip():
-            changes.append("Изменен заводской номер")
+            "Наименование": (
+                instrument.device_name,
+                request.form.get("device_name", "").strip()
+            ),
+
+            "Испытания": (
+                instrument.test_types,
+                request.form.get("test_types", "").strip()
+            ),
+
+            "Заводской номер": (
+                instrument.serial_number,
+                request.form.get("serial_number", "").strip()
+            ),
+
+            "Свидетельство": (
+                instrument.certificate_number,
+                request.form.get("certificate_number", "").strip()
+            ),
+
+            "Паспорт": (
+                instrument.passport_info,
+                request.form.get("passport_info", "").strip()
+            ),
+
+            "Примечание": (
+                instrument.note,
+                request.form.get("note", "").strip()
+            ),
+        }
+
+        for field_name, values in fields.items():
+
+            old_value, new_value = values
+
+            if str(old_value) != str(new_value):
+
+                changes.append(
+                    f"{field_name}: "
+                    f"'{old_value}' → '{new_value}'"
+                )
 
         instrument.device_name = request.form.get("device_name", "").strip()
         instrument.test_types = request.form.get("test_types", "").strip()
@@ -154,7 +251,7 @@ def edit_instrument(instrument_id: int):
             add_log(
                 "EDIT",
                 instrument.device_name,
-                ", ".join(changes)
+                " | ".join(changes)
             )
         return redirect(url_for("index"))
 
@@ -168,10 +265,21 @@ def instrument_card(instrument_id):
 
     today = date.today()
 
+    add_log(
+        "VIEW",
+        instrument.device_name,
+        f"Открыта карточка прибора ID={instrument.id}"
+    )
+
+    fgis_data = load_fgis_data(
+        instrument.certificate_number
+    )
+
     return render_template(
         'instrument_card.html',
         instrument=instrument,
-        today=today
+        today=today,
+        fgis_data=fgis_data
     )
 
 
