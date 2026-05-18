@@ -207,29 +207,6 @@
         </div>
 
 
-        {% if fgis_data and fgis_data.url %}
-
-        <div class="info">
-
-            <div class="label">
-                ФГИС Аршин
-            </div>
-
-            <div class="value">
-
-                <a href="{{ fgis_data.url }}"
-                   target="_blank">
-
-                    Открыть запись в ФГИС
-
-                </a>
-
-            </div>
-
-        </div>
-
-        {% endif %}
-
         <div class="info">
             <div class="label">Паспорт</div>
             <div class="value">
@@ -245,6 +222,118 @@
         </div>
 
     </div>
+
+{% if fgis %}
+
+<div style="margin-top:30px;">
+
+    <div class="title"
+         style="font-size:24px;">
+
+        Данные ФГИС Аршин
+
+    </div>
+
+    <div class="grid">
+
+        <div class="info">
+            <div class="label">
+                Тип СИ
+            </div>
+            <div class="value">
+                {{ fgis.type_title or '—' }}
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="label">
+                Модификация
+            </div>
+            <div class="value">
+                {{ fgis.modification or '—' }}
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="label">
+                Номер Госреестра
+            </div>
+            <div class="value">
+                {{ fgis.type_number or '—' }}
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="label">
+                Год выпуска
+            </div>
+            <div class="value">
+                {{ fgis.manufacture_year or '—' }}
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="label">
+                Дата поверки
+            </div>
+            <div class="value">
+                {{ fgis.verification_date or '—' }}
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="label">
+                Действительна до
+            </div>
+            <div class="value">
+                {{ fgis.valid_date or '—' }}
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="label">
+                Организация
+            </div>
+            <div class="value">
+                {{ fgis.organization or '—' }}
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="label">
+                Методика поверки
+            </div>
+            <div class="value">
+                {{ fgis.method or '—' }}
+            </div>
+        </div>
+
+    </div>
+
+    {% if fgis.etalons %}
+    <div class="title" style="font-size:20px;margin-top:24px;">
+        Эталонная база
+    </div>
+    <div class="grid">
+        {% for etalon in fgis.etalons %}
+        <div class="info">
+            <div class="label">Эталон</div>
+            <div class="value">{{ etalon.title or '—' }}</div>
+            <div class="label" style="margin-top:10px;">Модификация</div>
+            <div class="value">{{ etalon.modification or '—' }}</div>
+            <div class="label" style="margin-top:10px;">Номер</div>
+            <div class="value">{{ etalon.number or '—' }}</div>
+            <div class="label" style="margin-top:10px;">Рег. номер</div>
+            <div class="value">{{ etalon.reg_number or '—' }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+
+{% endif %}
+
 
     {% if instrument.next_verification and instrument.next_verification < today %}
 
