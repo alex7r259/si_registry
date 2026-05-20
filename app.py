@@ -1,4 +1,6 @@
 from datetime import date, datetime, timedelta
+def local_now():
+    return datetime.now()
 import json
 import re
 
@@ -43,7 +45,7 @@ class ActionLog(db.Model):
 
     ip_address: Mapped[str] = mapped_column(String(255), default='unknown')
 
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=local_now)
 
 
 def parse_date(raw_date: str | None) -> date | None:
@@ -274,7 +276,7 @@ def instrument_card(instrument_id):
 
     if instrument.fgis_sync_date:
 
-        delta = datetime.utcnow() - instrument.fgis_sync_date
+        delta = datetime.now() - instrument.fgis_sync_date
 
         if delta.total_seconds() < 86400:
 
@@ -294,7 +296,7 @@ def instrument_card(instrument_id):
         )
         if fgis_data:
             instrument.fgis_data = json.dumps(fgis_data, ensure_ascii=False)
-            instrument.fgis_sync_date = datetime.utcnow()
+            instrument.fgis_sync_date = datetime.now()
             db.session.commit()
             add_log(
                 "FGIS_SYNC",
