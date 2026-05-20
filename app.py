@@ -28,6 +28,7 @@ class Instrument(db.Model):
     passport_info: Mapped[str] = mapped_column(String(255), default="")
     note: Mapped[str] = mapped_column(String(1000), default="")
     in_verification: Mapped[bool] = mapped_column(default=False)
+    written_off: Mapped[bool] = mapped_column(default=False)
     fgis_data: Mapped[str] = mapped_column(Text, default="")
     fgis_sync_date: Mapped[datetime | None]
 
@@ -175,6 +176,7 @@ def add_instrument():
         passport_info=request.form.get("passport_info", "").strip(),
         note=request.form.get("note", "").strip(),
         in_verification=request.form.get("in_verification") == "on",
+        written_off=request.form.get("written_off") == "on",
     )
     db.session.add(instrument)
     db.session.commit()
@@ -246,6 +248,7 @@ def edit_instrument(instrument_id: int):
         instrument.passport_info = request.form.get("passport_info", "").strip()
         instrument.note = request.form.get("note", "").strip()
         instrument.in_verification = request.form.get("in_verification") == "on"
+        instrument.written_off = request.form.get("written_off") == "on"
         db.session.commit()
 
         if changes:

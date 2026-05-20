@@ -656,7 +656,14 @@
 </td>
                         <td>
 
-{% if instrument.in_verification %}
+{% if instrument.written_off %}
+
+    <span class="badge-status status-danger">
+        <i class="fa-solid fa-ban"></i>
+        Списан
+    </span>
+
+{% elif instrument.in_verification %}
 
     <span class="badge-status status-warning">
         <i class="fa-solid fa-screwdriver-wrench"></i>
@@ -699,7 +706,8 @@
             data-certificate-number="{{ instrument.certificate_number|e }}"
             data-passport-info="{{ instrument.passport_info|e }}"
             data-note="{{ instrument.note|e }}"
-            data-in-verification="{{ '1' if instrument.in_verification else '0' }}">
+            data-in-verification="{{ '1' if instrument.in_verification else '0' }}"
+            data-written-off="{{ '1' if instrument.written_off else '0' }}">
 
             <i class="fa-solid fa-pen"></i>
 
@@ -750,6 +758,10 @@
                         <input type="checkbox" class="form-check-input me-2" name="in_verification" id="modal_add_in_verification">
                         <label for="modal_add_in_verification" class="form-check-label">В поверке</label>
                     </div>
+                    <div class="col-12 form-check d-flex align-items-center ps-5">
+                        <input type="checkbox" class="form-check-input me-2" name="written_off" id="modal_add_written_off">
+                        <label for="modal_add_written_off" class="form-check-label">Списан</label>
+                    </div>
                     <div class="col-12 d-grid"><button class="btn btn-primary">Сохранить</button></div>
                 </form>
             </div>
@@ -777,6 +789,10 @@
                     <div class="col-12 form-check d-flex align-items-center ps-5">
                         <input type="checkbox" class="form-check-input me-2" name="in_verification" id="edit_in_verification">
                         <label for="edit_in_verification" class="form-check-label">В поверке</label>
+                    </div>
+                    <div class="col-12 form-check d-flex align-items-center ps-5">
+                        <input type="checkbox" class="form-check-input me-2" name="written_off" id="edit_written_off">
+                        <label for="edit_written_off" class="form-check-label">Списан</label>
                     </div>
                     <div class="col-12 d-grid"><button class="btn btn-primary">Сохранить изменения</button></div>
                 </form>
@@ -937,6 +953,7 @@
             $('#edit_passport_info').val(button.data('passportInfo'));
             $('#edit_note').val(button.data('note'));
             $('#edit_in_verification').prop('checked', button.data('inVerification') === 1);
+            $('#edit_written_off').prop('checked', button.data('writtenOff') === 1);
         });
     });
 
