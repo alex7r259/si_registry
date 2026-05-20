@@ -149,8 +149,9 @@ def index():
                 Instrument.note.ilike(like_pattern),
             )
         )
-
+    
     instruments = query.order_by(
+        Instrument.written_off.asc(),
         Instrument.next_verification.asc().nullslast(),
         Instrument.device_name.asc(),
     ).all()
@@ -225,6 +226,16 @@ def edit_instrument(instrument_id: int):
             "Примечание": (
                 instrument.note,
                 request.form.get("note", "").strip()
+            ),
+            
+            "Списан": (
+                instrument.written_off,
+                request.form.get("written_off") == "on"
+            ),
+            
+            "В поверке": (
+                instrument.in_verification,
+                request.form.get("in_verification") == "on"
             ),
         }
 
