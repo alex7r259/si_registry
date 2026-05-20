@@ -12,7 +12,10 @@
     
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
+		  
+    <link rel="icon"
+          href="{{ url_for('static', filename='favicon.ico') }}">
+	  
     <style>
         :root{
 
@@ -828,7 +831,7 @@
 
                 row.child(`
 
-                    <div class="expand-content">
+                    <div class="expand-content" onclick="window.location='/instrument/${button.data('id')}'">
 
                         <div class="info-grid">
 
