@@ -156,12 +156,46 @@ def index():
         Instrument.device_name.asc(),
     ).all()
 
+    calendar_events = []
+
+    today = date.today()
+    month_ahead = today + timedelta(days=30)
+
+    for instrument in instruments:
+
+        if not instrument.next_verification:
+            continue
+
+        if instrument.written_off:
+
+            color = "#94a3b8"
+
+        elif instrument.next_verification < today:
+
+            color = "#dc2626"
+
+        elif instrument.next_verification <= month_ahead:
+
+            color = "#d97706"
+
+        else:
+
+            color = "#16a34a"
+
+        calendar_events.append({
+            "title": f"{instrument.device_name} ({instrument.serial_number})",
+            "start": instrument.next_verification.isoformat(),
+            "url": f"/instrument/{instrument.id}",
+            "color": color
+        })
+
     return render_template(
         "index.html",
         instruments=instruments,
         search=search,
-        today=date.today(),
-        month_ahead=date.today() + timedelta(days=30),
+        today=today,
+        month_ahead=month_ahead,
+        calendar_events=calendar_events
     )
 
 
